@@ -177,8 +177,7 @@
     if (typeof STATE_AV_LAWS === "undefined" || !Array.isArray(STATE_AV_LAWS)) { return []; }
     return STATE_AV_LAWS.filter(function (record) { return record.code === code; })
       .sort(function (a, b) {
-        return Number(b.year || 0) - Number(a.year || 0) ||
-          String(a.billNumber || "").localeCompare(String(b.billNumber || ""));
+        return String(a.originalBill || "").localeCompare(String(b.originalBill || ""));
       });
   }
 
@@ -211,18 +210,33 @@
     records.forEach(function (record) {
       var article = create("article", "state-law-record");
       var meta = create("div", "state-law-meta");
-      if (record.billNumber) { meta.appendChild(create("span", "bill-number", record.billNumber)); }
-      if (record.status) { meta.appendChild(create("span", null, record.status)); }
-      if (record.year) { meta.appendChild(create("span", null, String(record.year))); }
+      meta.appendChild(create("span", "statute-status", "AV statute: " + (record.avSpecificStatute || "Not provided")));
+      if (record.originalBill) { meta.appendChild(create("span", "bill-number", record.originalBill)); }
       article.appendChild(meta);
-      article.appendChild(create("h4", null, record.title || record.billNumber || "AV statute or bill"));
-      if (record.statute) {
-        var statute = create("p", "statute-citation");
-        statute.appendChild(create("strong", null, "Statute"));
-        statute.appendChild(document.createTextNode(record.statute));
-        article.appendChild(statute);
-      }
-      if (record.summary) { article.appendChild(create("p", null, record.summary)); }
+      article.appendChild(create("h4", null, record.currentLegalStatus || "AV legal record"));
+
+      var details = create("dl", "state-law-details");
+      [
+        ["AV-specific statute", "avSpecificStatute"],
+        ["AV-specific regulation", "avSpecificRegulation"],
+        ["Current AV legal status", "currentLegalStatus"],
+        ["Original bill/file", "originalBill"],
+        ["Primary sponsor and position", "primarySponsor"],
+        ["Relevant committee", "relevantCommittee"],
+        ["Enacted act", "enactedAct"],
+        ["Current code citation", "currentCodeCitation"],
+        ["Safety-driver requirement or driverless allowed", "safetyDriverRequirement"],
+        ["Liability coverage requirements", "liabilityCoverage"],
+        ["Commercial deployment", "commercialDeployment"],
+        ["Procedure", "procedure"]
+      ].forEach(function (field) {
+        var row = create("div", "state-law-field");
+        row.appendChild(create("dt", null, field[0]));
+        row.appendChild(create("dd", record[field[1]] ? null : "not-provided", record[field[1]] || "Not provided"));
+        details.appendChild(row);
+      });
+      article.appendChild(details);
+
       if (record.url) {
         var link = create("a", "state-source-link", "View supplied source ↗");
         link.href = record.url;

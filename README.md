@@ -29,9 +29,11 @@ This website provides a structured review of autonomous-vehicle laws, regulation
 ## State map data
 
 Add state and District of Columbia AV statutes and bills to the
-`STATE_AV_LAWS` array in `data.js`. Each record supports a state name,
-two-letter code, title, statutory citation, bill number, status, year,
-summary, and source URL.
+`STATE_AV_LAWS` array in `data.js`. Its fields match the spreadsheet:
+state, AV-specific statute and regulation, current legal status, original
+bill/file, sponsor, committee, enacted act, code citation, safety-driver
+requirements, liability coverage, commercial deployment, procedure, and
+an optional owner-supplied source URL.
 
 The geographic interface uses Leaflet 1.9.4, an OpenStreetMap basemap,
 and a generalized 50-state-and-D.C. boundary layer served by the

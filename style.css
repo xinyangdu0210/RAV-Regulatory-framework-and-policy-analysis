@@ -330,7 +330,7 @@ a { color: inherit; }
 }
 .state-map-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1.45fr) minmax(340px, .55fr);
+  grid-template-columns: minmax(0, 1.15fr) minmax(420px, .85fr);
   align-items: start;
   gap: 24px;
 }
@@ -463,8 +463,32 @@ a { color: inherit; }
   text-transform: uppercase;
 }
 .state-law-meta .bill-number { color: var(--ink); background: var(--acid); }
+.state-law-meta .statute-status { color: #fff; background: var(--ink); }
 .state-law-record h4 { margin: 0 0 10px; font: 400 23px/1.1 var(--serif); }
 .state-law-record p { margin: 8px 0; color: var(--muted); font-size: 13px; }
+.state-law-details { margin: 18px 0 0; }
+.state-law-field {
+  display: grid;
+  grid-template-columns: minmax(125px, .42fr) minmax(0, .58fr);
+  gap: 14px;
+  padding: 13px 0;
+  border-top: 1px solid var(--line);
+}
+.state-law-field dt {
+  color: var(--coral);
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+.state-law-field dd {
+  margin: 0;
+  color: var(--ink);
+  font-size: 12px;
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+}
+.state-law-field dd.not-provided { color: var(--muted); font-style: italic; }
 .statute-citation strong {
   display: block;
   margin-bottom: 2px;
