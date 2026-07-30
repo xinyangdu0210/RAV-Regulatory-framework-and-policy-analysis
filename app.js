@@ -308,7 +308,7 @@
     map = L.map(mapNode, {
       minZoom: 3,
       maxZoom: 8,
-      scrollWheelZoom: false,
+      scrollWheelZoom: true,
       zoomControl: true
     });
     L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
