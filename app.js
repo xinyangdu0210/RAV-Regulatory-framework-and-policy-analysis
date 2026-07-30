@@ -837,9 +837,6 @@
   hydrateState();
   fillMeta();
   renderStateMap();
-  renderDomains();
-  renderMatrix();
-  renderAssessment();
   populateFilters();
   renderCompare();
   renderPolicies();
