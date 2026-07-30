@@ -183,12 +183,6 @@
     panel.appendChild(create("h3", null, stateInfo.name));
 
     var records = stateLawRecords(stateInfo.code);
-    panel.appendChild(create(
-      "p",
-      "state-record-count",
-      records.length + " AV law " + (records.length === 1 ? "record" : "records")
-    ));
-
     if (!records.length) {
       var empty = create("div", "state-law-empty");
       empty.appendChild(create("strong", null, "No statutes or bills added yet"));
