@@ -86,6 +86,39 @@
       <span>Educational resource — not legal advice</span>
     </aside>
 
+    <section class="section state-map-section" id="state-map">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">50 states + District of Columbia</p>
+          <h2>Explore AV statutes and bills by jurisdiction</h2>
+        </div>
+        <p>Select a state or D.C. to review its owner-supplied AV-specific statutes, bill numbers, status, and source links.</p>
+      </div>
+      <div class="state-map-layout">
+        <div class="state-map-card">
+          <div class="state-map-toolbar">
+            <div class="map-legend" aria-label="Map legend">
+              <span><i class="map-swatch has-records"></i> Records added</span>
+              <span><i class="map-swatch no-records"></i> Awaiting records</span>
+            </div>
+            <label>
+              <span>Choose a jurisdiction</span>
+              <select id="state-map-select">
+                <option value="">Select a state or D.C.</option>
+              </select>
+            </label>
+          </div>
+          <div class="us-map" id="us-map" aria-label="Interactive map of the 50 states and District of Columbia"></div>
+          <p class="map-instruction">Click a state tile or use the jurisdiction menu. Use Tab and Enter to navigate the map by keyboard.</p>
+        </div>
+        <aside class="state-law-panel" id="state-law-panel" aria-live="polite">
+          <p class="eyebrow">Jurisdiction details</p>
+          <h3>Select a state or D.C.</h3>
+          <p>AV-specific statutes and bill numbers will appear here after you choose a jurisdiction.</p>
+        </aside>
+      </div>
+    </section>
+
     <section class="section" id="framework">
       <div class="section-heading">
         <div>

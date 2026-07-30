@@ -10,6 +10,60 @@
     "Accessibility"
   ];
 
+  var US_STATES = [
+    { code: "AL", name: "Alabama", x: 6, y: 4 },
+    { code: "AK", name: "Alaska", x: 0, y: 6 },
+    { code: "AZ", name: "Arizona", x: 1, y: 3 },
+    { code: "AR", name: "Arkansas", x: 4, y: 3 },
+    { code: "CA", name: "California", x: 0, y: 2 },
+    { code: "CO", name: "Colorado", x: 3, y: 2 },
+    { code: "CT", name: "Connecticut", x: 11, y: 1 },
+    { code: "DE", name: "Delaware", x: 10, y: 2 },
+    { code: "DC", name: "District of Columbia", x: 9, y: 3 },
+    { code: "FL", name: "Florida", x: 8, y: 5 },
+    { code: "GA", name: "Georgia", x: 7, y: 4 },
+    { code: "HI", name: "Hawaii", x: 1, y: 6 },
+    { code: "ID", name: "Idaho", x: 1, y: 1 },
+    { code: "IL", name: "Illinois", x: 6, y: 1 },
+    { code: "IN", name: "Indiana", x: 7, y: 1 },
+    { code: "IA", name: "Iowa", x: 5, y: 1 },
+    { code: "KS", name: "Kansas", x: 3, y: 3 },
+    { code: "KY", name: "Kentucky", x: 6, y: 2 },
+    { code: "LA", name: "Louisiana", x: 4, y: 4 },
+    { code: "ME", name: "Maine", x: 12, y: 0 },
+    { code: "MD", name: "Maryland", x: 9, y: 2 },
+    { code: "MA", name: "Massachusetts", x: 12, y: 1 },
+    { code: "MI", name: "Michigan", x: 7, y: 0 },
+    { code: "MN", name: "Minnesota", x: 5, y: 0 },
+    { code: "MS", name: "Mississippi", x: 5, y: 4 },
+    { code: "MO", name: "Missouri", x: 5, y: 2 },
+    { code: "MT", name: "Montana", x: 2, y: 0 },
+    { code: "NE", name: "Nebraska", x: 4, y: 2 },
+    { code: "NV", name: "Nevada", x: 1, y: 2 },
+    { code: "NH", name: "New Hampshire", x: 11, y: 0 },
+    { code: "NJ", name: "New Jersey", x: 10, y: 1 },
+    { code: "NM", name: "New Mexico", x: 2, y: 3 },
+    { code: "NY", name: "New York", x: 9, y: 0 },
+    { code: "NC", name: "North Carolina", x: 7, y: 3 },
+    { code: "ND", name: "North Dakota", x: 4, y: 0 },
+    { code: "OH", name: "Ohio", x: 8, y: 1 },
+    { code: "OK", name: "Oklahoma", x: 3, y: 4 },
+    { code: "OR", name: "Oregon", x: 0, y: 1 },
+    { code: "PA", name: "Pennsylvania", x: 9, y: 1 },
+    { code: "RI", name: "Rhode Island", x: 12, y: 2 },
+    { code: "SC", name: "South Carolina", x: 8, y: 3 },
+    { code: "SD", name: "South Dakota", x: 4, y: 1 },
+    { code: "TN", name: "Tennessee", x: 5, y: 3 },
+    { code: "TX", name: "Texas", x: 3, y: 5 },
+    { code: "UT", name: "Utah", x: 2, y: 2 },
+    { code: "VT", name: "Vermont", x: 10, y: 0 },
+    { code: "VA", name: "Virginia", x: 8, y: 2 },
+    { code: "WA", name: "Washington", x: 0, y: 0 },
+    { code: "WV", name: "West Virginia", x: 7, y: 2 },
+    { code: "WI", name: "Wisconsin", x: 6, y: 0 },
+    { code: "WY", name: "Wyoming", x: 2, y: 1 }
+  ];
+
   var DOMAIN_INFO = {
     "Safety assurance": {
       question: "How will the project demonstrate that the ADS is safe inside its rural operational design domain?",
@@ -66,12 +120,21 @@
     return node;
   }
 
+  function createSvg(tag, attributes) {
+    var node = document.createElementNS("http://www.w3.org/2000/svg", tag);
+    Object.keys(attributes || {}).forEach(function (name) {
+      node.setAttribute(name, attributes[name]);
+    });
+    return node;
+  }
+
   var state = {
     search: "",
     jurisdiction: "",
     domain: "",
     effect: "",
-    priorityDomains: []
+    priorityDomains: [],
+    selectedState: ""
   };
   var compareIds = [];
   try {
@@ -99,6 +162,7 @@
     state.jurisdiction = params.get("jurisdiction") || "";
     state.domain = params.get("domain") || "";
     state.effect = params.get("effect") || "";
+    state.selectedState = params.get("state") || "";
   }
 
   function syncUrl() {
@@ -108,12 +172,155 @@
     if (state.jurisdiction) { params.set("jurisdiction", state.jurisdiction); }
     if (state.domain) { params.set("domain", state.domain); }
     if (state.effect) { params.set("effect", state.effect); }
+    if (state.selectedState) { params.set("state", state.selectedState); }
     history.replaceState(null, "", location.pathname + (params.toString() ? "?" + params : "") + location.hash);
   }
 
   function fillMeta() {
     $("#stat-policies").textContent = POLICIES.length;
     $("#stat-binding").textContent = POLICIES.filter(function (policy) { return policy.binding; }).length;
+  }
+
+  function stateLawRecords(code) {
+    if (typeof STATE_AV_LAWS === "undefined" || !Array.isArray(STATE_AV_LAWS)) { return []; }
+    return STATE_AV_LAWS.filter(function (record) { return record.code === code; })
+      .sort(function (a, b) {
+        return Number(b.year || 0) - Number(a.year || 0) ||
+          String(a.billNumber || "").localeCompare(String(b.billNumber || ""));
+      });
+  }
+
+  function renderStatePanel(stateInfo) {
+    var panel = $("#state-law-panel");
+    panel.innerHTML = "";
+    panel.appendChild(create("p", "eyebrow", stateInfo.code + " · Jurisdiction details"));
+    panel.appendChild(create("h3", null, stateInfo.name));
+
+    var records = stateLawRecords(stateInfo.code);
+    panel.appendChild(create(
+      "p",
+      "state-record-count",
+      records.length + " owner-supplied AV " + (records.length === 1 ? "record" : "records")
+    ));
+
+    if (!records.length) {
+      var empty = create("div", "state-law-empty");
+      empty.appendChild(create("strong", null, "No statutes or bills added yet"));
+      empty.appendChild(create(
+        "p",
+        null,
+        "Add " + stateInfo.name + " records to STATE_AV_LAWS in data.js. Nothing is generated automatically."
+      ));
+      panel.appendChild(empty);
+      return;
+    }
+
+    var list = create("div", "state-law-list");
+    records.forEach(function (record) {
+      var article = create("article", "state-law-record");
+      var meta = create("div", "state-law-meta");
+      if (record.billNumber) { meta.appendChild(create("span", "bill-number", record.billNumber)); }
+      if (record.status) { meta.appendChild(create("span", null, record.status)); }
+      if (record.year) { meta.appendChild(create("span", null, String(record.year))); }
+      article.appendChild(meta);
+      article.appendChild(create("h4", null, record.title || record.billNumber || "AV statute or bill"));
+      if (record.statute) {
+        var statute = create("p", "statute-citation");
+        statute.appendChild(create("strong", null, "Statute"));
+        statute.appendChild(document.createTextNode(record.statute));
+        article.appendChild(statute);
+      }
+      if (record.summary) { article.appendChild(create("p", null, record.summary)); }
+      if (record.url) {
+        var link = create("a", "state-source-link", "View supplied source ↗");
+        link.href = record.url;
+        link.target = "_blank";
+        link.rel = "noopener";
+        article.appendChild(link);
+      }
+      list.appendChild(article);
+    });
+    panel.appendChild(list);
+  }
+
+  function renderStateMap() {
+    var map = $("#us-map");
+    var select = $("#state-map-select");
+    if (!map || !select) { return; }
+
+    var svg = createSvg("svg", {
+      viewBox: "0 0 900 420",
+      role: "group",
+      "aria-label": "Select a state or the District of Columbia"
+    });
+    var tileWidth = 62;
+    var tileHeight = 48;
+    var stepX = 68;
+    var stepY = 57;
+    var offsetX = 7;
+    var offsetY = 14;
+
+    US_STATES.slice().sort(function (a, b) { return a.name.localeCompare(b.name); }).forEach(function (stateInfo) {
+      var option = create("option", null, stateInfo.name);
+      option.value = stateInfo.code;
+      select.appendChild(option);
+    });
+
+    US_STATES.forEach(function (stateInfo) {
+      var count = stateLawRecords(stateInfo.code).length;
+      var group = createSvg("g", {
+        class: "state-tile" + (count ? " has-records" : ""),
+        transform: "translate(" + (offsetX + stateInfo.x * stepX) + " " + (offsetY + stateInfo.y * stepY) + ")",
+        role: "button",
+        tabindex: "0",
+        "data-state-code": stateInfo.code,
+        "aria-label": stateInfo.name + ": " + count + " AV " + (count === 1 ? "record" : "records")
+      });
+      group.appendChild(createSvg("rect", { width: tileWidth, height: tileHeight, rx: "8", ry: "8" }));
+      var label = createSvg("text", { x: tileWidth / 2, y: "29", "text-anchor": "middle" });
+      label.textContent = stateInfo.code;
+      group.appendChild(label);
+      var badge = createSvg("circle", { cx: "53", cy: "8", r: "7", class: "state-count-badge" });
+      group.appendChild(badge);
+      var badgeText = createSvg("text", { x: "53", y: "11", "text-anchor": "middle", class: "state-count-text" });
+      badgeText.textContent = count ? String(Math.min(count, 9)) : "";
+      group.appendChild(badgeText);
+
+      var selectState = function () {
+        state.selectedState = stateInfo.code;
+        $$(".state-tile", svg).forEach(function (tile) {
+          tile.classList.toggle("selected", tile.dataset.stateCode === stateInfo.code);
+          tile.setAttribute("aria-pressed", String(tile.dataset.stateCode === stateInfo.code));
+        });
+        select.value = stateInfo.code;
+        renderStatePanel(stateInfo);
+        syncUrl();
+      };
+      group.addEventListener("click", selectState);
+      group.addEventListener("keydown", function (event) {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          selectState();
+        }
+      });
+      svg.appendChild(group);
+    });
+
+    select.addEventListener("change", function () {
+      var stateInfo = US_STATES.find(function (item) { return item.code === select.value; });
+      if (!stateInfo) { return; }
+      var tile = $('.state-tile[data-state-code="' + stateInfo.code + '"]', svg);
+      if (tile) {
+        tile.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+        tile.focus();
+      }
+    });
+    map.appendChild(svg);
+
+    if (state.selectedState) {
+      var initialTile = $('.state-tile[data-state-code="' + state.selectedState + '"]', svg);
+      if (initialTile) { initialTile.dispatchEvent(new MouseEvent("click", { bubbles: true })); }
+    }
   }
 
   function renderDomains() {
@@ -543,6 +750,7 @@
 
   hydrateState();
   fillMeta();
+  renderStateMap();
   renderDomains();
   renderMatrix();
   renderAssessment();

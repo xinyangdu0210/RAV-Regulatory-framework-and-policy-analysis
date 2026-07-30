@@ -26,6 +26,13 @@ This website provides a structured review of autonomous-vehicle laws, regulation
 - `app.js` — search, filtering, and interactive functions
 - `style.css` — colors, fonts, spacing, and layout
 
+## State map data
+
+Add state and District of Columbia AV statutes and bills to the
+`STATE_AV_LAWS` array in `data.js`. Each record supports a state name,
+two-letter code, title, statutory citation, bill number, status, year,
+summary, and source URL.
+
 ## Disclaimer
 
 This website is an educational and research resource and does not constitute legal advice. Requirements may vary depending on the vehicle, operator, service type, and jurisdiction.
