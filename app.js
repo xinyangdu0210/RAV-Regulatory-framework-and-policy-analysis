@@ -265,6 +265,10 @@
     var dcMarker = null;
     var stateLayers = {};
     var continentalBounds = [[24.2, -125.2], [50, -66.2]];
+    var specialStateBounds = {
+      AK: [[51, -170], [72, -129]],
+      HI: [[18.5, -161], [22.5, -154]]
+    };
 
     function styleFor(code, selected) {
       var hasRecords = stateLawRecords(code).length > 0;
@@ -293,7 +297,7 @@
       if (stateLayers[stateInfo.code]) {
         stateLayers[stateInfo.code].bringToFront();
         if (focusLayer) {
-          map.fitBounds(stateLayers[stateInfo.code].getBounds(), {
+          map.fitBounds(specialStateBounds[stateInfo.code] || stateLayers[stateInfo.code].getBounds(), {
             padding: [32, 32],
             maxZoom: stateInfo.code === "AK" ? 4 : 6
           });
@@ -314,7 +318,7 @@
       mapNode.classList.add("map-load-error");
       mapNode.textContent = "The geographic map library could not load. Use the jurisdiction menu to view state records.";
       if (state.selectedState) {
-        selectState(US_STATES.find(function (item) { return item.code === state.selectedState; }), false);
+        selectState(US_STATES.find(function (item) { return item.code === state.selectedState; }), true);
       }
       return;
     }
