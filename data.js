@@ -6,7 +6,7 @@ var POLICY_META = {
 };
 
 /*
-  Add only policy records and source links supplied by the project owner.
+  Add only policy records and source links provided for this project.
 
   Record format:
   {
@@ -22,14 +22,14 @@ var POLICY_META = {
     rural: "Direct, Conditional, or Transferable",
     summary: "Source-based summary",
     ruralAction: "Source-based implementation action",
-    url: "Source URL supplied by the project owner"
+    url: "Provided source URL"
   }
 */
 var POLICIES = [];
 
 /*
   Add only state and District of Columbia AV-law records supplied by the
-  project owner. The field names below correspond to the spreadsheet columns.
+  project. The field names below correspond to the spreadsheet columns.
 
   Record format:
   {
@@ -47,7 +47,7 @@ var POLICIES = [];
     liabilityCoverage: "Liability coverage requirements",
     commercialDeployment: "Commercial deployment information",
     procedure: "Required procedure",
-    url: "Optional source URL supplied by the project owner"
+    url: "Optional provided source URL"
   }
 */
 var STATE_AV_LAWS = [

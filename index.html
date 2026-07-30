@@ -56,13 +56,13 @@
         <h1>Move from autonomous-vehicle policy to a <em>deployable rural service.</em></h1>
         <p class="hero-lede">Explore how federal vehicle rules and the operating laws of all 50 states and D.C. fit with infrastructure, accessibility, cybersecurity, and transit requirements.</p>
         <div class="hero-actions">
-          <a class="button ghost" href="#explorer">Explore policy sources</a>
+          <a class="button ghost" href="#explorer">Open the State Policy Explorer</a>
         </div>
         <dl class="hero-stats">
-          <div><dt id="stat-policies">0</dt><dd>policy sources</dd></div>
-          <div><dt id="stat-binding">0</dt><dd>binding instruments</dd></div>
-          <div><dt>2</dt><dd>policy layers</dd></div>
-          <div><dt>6</dt><dd>decision domains</dd></div>
+          <div><dt id="stat-policies">0</dt><dd>state AV records</dd></div>
+          <div><dt id="stat-binding">0</dt><dd>states with records</dd></div>
+          <div><dt>51</dt><dd>jurisdictions</dd></div>
+          <div><dt>3</dt><dd>record types</dd></div>
         </dl>
       </div>
       <div class="hero-visual" aria-label="Federal, state, and project policy layers">
@@ -93,7 +93,7 @@
           <p class="eyebrow">50 states + District of Columbia</p>
           <h2>Explore AV statutes and bills by jurisdiction</h2>
         </div>
-        <p>Select a state or D.C. to review its owner-supplied AV-specific statutes, bill numbers, status, and source links.</p>
+        <p>Select a state or D.C. to review its AV-specific statutes, bill numbers, status, and supplied source links.</p>
       </div>
       <div class="state-map-layout">
         <div class="state-map-card">
@@ -123,30 +123,23 @@
     <section class="section" id="explorer">
       <div class="section-heading">
         <div>
-          <p class="eyebrow">Policy-source database</p>
-          <h2>Policy explorer</h2>
+          <p class="eyebrow">50 states + District of Columbia</p>
+          <h2>State Policy Explorer</h2>
         </div>
-        <p>Filter by authority, domain, instrument status, or binding effect. Open every record at its cited source.</p>
+        <p>Choose a state or D.C., then filter the available legal information by bill, enacted act, or current code citation.</p>
       </div>
       <div class="toolbar">
-        <label class="search-field">
-          <span>Search policy sources</span>
-          <input id="search" type="search" placeholder="Search title, agency, action…">
+        <label>
+          <span>State &amp; DC</span>
+          <select id="jurisdiction-filter"><option value="">All 50 states &amp; DC</option></select>
         </label>
         <label>
-          <span>Jurisdiction</span>
-          <select id="jurisdiction-filter"><option value="">All jurisdictions</option></select>
-        </label>
-        <label>
-          <span>Domain</span>
-          <select id="domain-filter"><option value="">All domains</option></select>
-        </label>
-        <label>
-          <span>Effect</span>
-          <select id="effect-filter">
-            <option value="">Binding + guidance</option>
-            <option value="binding">Binding</option>
-            <option value="guidance">Guidance / resource</option>
+          <span>Record type</span>
+          <select id="record-type-filter">
+            <option value="">Bill, Act &amp; Code</option>
+            <option value="bill">Bill</option>
+            <option value="act">Act</option>
+            <option value="code">Code</option>
           </select>
         </label>
         <button id="reset-filters" class="button small" type="button">Reset</button>
@@ -200,7 +193,7 @@
         <h2>Built for traceable policy planning</h2>
       </div>
       <div class="source-copy">
-        <p>Policy records and links will be added only from federal and state bill sources supplied by the project owner. The website does not generate or select policy sources automatically.</p>
+        <p>Policy records and links will be added only from the provided federal and state bill sources. The website does not generate or select policy sources automatically.</p>
         <p>Policy changes quickly. Confirm current requirements with the responsible agency and qualified counsel before procurement, testing, or deployment.</p>
       </div>
     </section>

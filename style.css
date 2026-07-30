@@ -671,7 +671,7 @@ button.matrix-cell:hover { background: rgba(255,255,255,.1); }
 
 .toolbar {
   display: grid;
-  grid-template-columns: 1.5fr repeat(3, 1fr) auto;
+  grid-template-columns: minmax(260px, 1fr) minmax(220px, .8fr) auto;
   align-items: end;
   gap: 10px;
   padding: 18px;
@@ -733,6 +733,14 @@ button.matrix-cell:hover { background: rgba(255,255,255,.1); }
 }
 .policy-meta .effect { align-self: flex-start; padding: 4px 7px; border-radius: 3px; color: var(--ink); background: #e2e4da; }
 .policy-meta .effect.binding { background: var(--acid); }
+.policy-meta .record-type-present {
+  align-self: flex-start;
+  padding: 4px 7px;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  color: var(--ink);
+  background: #fff;
+}
 .policy-card h3 { margin: 0 0 4px; font: 400 25px/1.15 var(--serif); }
 .policy-issuer { margin: 0 0 13px; color: var(--coral); font-size: 12px; font-weight: 850; }
 .policy-summary { margin: 0; color: var(--muted); }
@@ -762,6 +770,27 @@ button.matrix-cell:hover { background: rgba(255,255,255,.1); }
 }
 .policy-actions a { color: #fff; background: var(--ink); }
 .policy-actions button.saved { background: var(--acid); }
+.explorer-record-details {
+  display: grid;
+  gap: 8px;
+  margin: 18px 0 0;
+}
+.explorer-record-field {
+  display: grid;
+  grid-template-columns: 72px minmax(0, 1fr);
+  gap: 14px;
+  padding-top: 9px;
+  border-top: 1px solid var(--line);
+}
+.explorer-record-field dt {
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+}
+.explorer-record-field dd { margin: 0; }
+.explorer-record-field dd.not-provided { color: var(--muted); font-style: italic; }
 .empty-state { padding: 50px; border: 1px dashed var(--line); text-align: center; color: var(--muted); }
 
 .roadmap-section { max-width: none; padding-left: max(60px, calc((100vw - 1320px) / 2)); padding-right: max(60px, calc((100vw - 1320px) / 2)); }

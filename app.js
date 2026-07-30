@@ -121,10 +121,8 @@
   }
 
   var state = {
-    search: "",
     jurisdiction: "",
-    domain: "",
-    effect: "",
+    recordType: "",
     priorityDomains: [],
     selectedState: ""
   };
@@ -150,27 +148,24 @@
   function hydrateState() {
     if (!window.URLSearchParams) { return; }
     var params = new URLSearchParams(location.search);
-    state.search = params.get("q") || "";
     state.jurisdiction = params.get("jurisdiction") || "";
-    state.domain = params.get("domain") || "";
-    state.effect = params.get("effect") || "";
+    state.recordType = params.get("type") || "";
     state.selectedState = params.get("state") || "";
   }
 
   function syncUrl() {
     if (!window.history || !window.URLSearchParams) { return; }
     var params = new URLSearchParams();
-    if (state.search) { params.set("q", state.search); }
     if (state.jurisdiction) { params.set("jurisdiction", state.jurisdiction); }
-    if (state.domain) { params.set("domain", state.domain); }
-    if (state.effect) { params.set("effect", state.effect); }
+    if (state.recordType) { params.set("type", state.recordType); }
     if (state.selectedState) { params.set("state", state.selectedState); }
     history.replaceState(null, "", location.pathname + (params.toString() ? "?" + params : "") + location.hash);
   }
 
   function fillMeta() {
-    $("#stat-policies").textContent = POLICIES.length;
-    $("#stat-binding").textContent = POLICIES.filter(function (policy) { return policy.binding; }).length;
+    var records = typeof STATE_AV_LAWS !== "undefined" && Array.isArray(STATE_AV_LAWS) ? STATE_AV_LAWS : [];
+    $("#stat-policies").textContent = records.length;
+    $("#stat-binding").textContent = new Set(records.map(function (record) { return record.code; })).size;
   }
 
   function stateLawRecords(code) {
@@ -191,7 +186,7 @@
     panel.appendChild(create(
       "p",
       "state-record-count",
-      records.length + " owner-supplied AV " + (records.length === 1 ? "record" : "records")
+      records.length + " AV law " + (records.length === 1 ? "record" : "records")
     ));
 
     if (!records.length) {
@@ -416,7 +411,7 @@
       dcMarker.on("click", function () { selectState(dcInfo, false); });
 
       if (state.selectedState) {
-        selectState(US_STATES.find(function (item) { return item.code === state.selectedState; }), false);
+        selectState(US_STATES.find(function (item) { return item.code === state.selectedState; }), true);
       }
     }).catch(function () {
       var notice = create("div", "map-error-notice", "State boundaries could not load. Use the jurisdiction menu to view records.");
@@ -580,8 +575,8 @@
     $("#score-explore").disabled = !priority.length;
     $("#score-explore").onclick = function () {
       state.priorityDomains = priority.map(function (answer) { return answer.domain; });
-      state.domain = "";
-      $("#domain-filter").value = "";
+      state.recordType = "";
+      $("#record-type-filter").value = "";
       renderPolicies();
       $("#explorer").scrollIntoView({ behavior: "smooth" });
     };
@@ -589,77 +584,139 @@
 
   function populateFilters() {
     var jurisdiction = $("#jurisdiction-filter");
-    ["Federal", "States & DC"].concat(unique("jurisdiction").filter(function (value) {
-      return value !== "Federal" && value !== "States & DC";
-    })).forEach(function (value) {
-      var option = create("option", null, value);
-      option.value = value;
+    US_STATES.slice().sort(function (a, b) {
+      return a.name.localeCompare(b.name);
+    }).forEach(function (stateInfo) {
+      var option = create("option", null, stateInfo.name);
+      option.value = stateInfo.code;
       jurisdiction.appendChild(option);
     });
-    var domain = $("#domain-filter");
-    DOMAINS.forEach(function (value) {
-      var option = create("option", null, value);
-      option.value = value;
-      domain.appendChild(option);
-    });
-    $("#search").value = state.search;
     jurisdiction.value = state.jurisdiction;
-    domain.value = state.domain;
-    $("#effect-filter").value = state.effect;
-    $("#search").addEventListener("input", function () {
-      state.search = this.value.trim();
-      state.priorityDomains = [];
-      renderPolicies();
-    });
+    $("#record-type-filter").value = state.recordType;
     jurisdiction.addEventListener("change", function () {
       state.jurisdiction = this.value;
-      state.priorityDomains = [];
       renderPolicies();
     });
-    domain.addEventListener("change", function () {
-      state.domain = this.value;
-      state.priorityDomains = [];
-      renderPolicies();
-    });
-    $("#effect-filter").addEventListener("change", function () {
-      state.effect = this.value;
+    $("#record-type-filter").addEventListener("change", function () {
+      state.recordType = this.value;
       renderPolicies();
     });
     $("#reset-filters").addEventListener("click", function () { setExplorerFilters({}); });
   }
 
   function setExplorerFilters(next) {
-    state.search = next.search || "";
     state.jurisdiction = next.jurisdiction || "";
-    state.domain = next.domain || "";
-    state.effect = next.effect || "";
+    state.recordType = next.recordType || "";
     state.priorityDomains = [];
-    $("#search").value = state.search;
     $("#jurisdiction-filter").value = state.jurisdiction;
-    $("#domain-filter").value = state.domain;
-    $("#effect-filter").value = state.effect;
+    $("#record-type-filter").value = state.recordType;
     renderPolicies();
   }
 
+  function hasSuppliedValue(value) {
+    var normalized = String(value || "").trim().toLowerCase();
+    return normalized !== "" && normalized !== "na" && normalized !== "n/a" && normalized !== "not applicable";
+  }
+
+  function recordHasType(record, type) {
+    if (!type) { return true; }
+    if (type === "bill") { return hasSuppliedValue(record.originalBill); }
+    if (type === "act") { return hasSuppliedValue(record.enactedAct); }
+    if (type === "code") { return hasSuppliedValue(record.currentCodeCitation); }
+    return true;
+  }
+
   function filteredPolicies() {
-    var query = state.search.toLowerCase();
-    return POLICIES.filter(function (policy) {
-      if (query && [
-        policy.title, policy.issuer, policy.summary, policy.ruralAction,
-        policy.domain, policy.instrument, policy.status
-      ].join(" ").toLowerCase().indexOf(query) === -1) { return false; }
-      if (!matchesJurisdiction(policy, state.jurisdiction)) { return false; }
-      if (state.domain && policy.domain !== state.domain) { return false; }
-      if (state.priorityDomains.length && state.priorityDomains.indexOf(policy.domain) === -1) { return false; }
-      if (state.effect === "binding" && !policy.binding) { return false; }
-      if (state.effect === "guidance" && policy.binding) { return false; }
-      return true;
+    var records = typeof STATE_AV_LAWS !== "undefined" && Array.isArray(STATE_AV_LAWS) ? STATE_AV_LAWS : [];
+    return records.filter(function (record) {
+      if (state.jurisdiction && record.code !== state.jurisdiction) { return false; }
+      return recordHasType(record, state.recordType);
     }).sort(function (a, b) {
-      return Number(b.binding) - Number(a.binding) || b.year - a.year || a.title.localeCompare(b.title);
+      return String(a.state || "").localeCompare(String(b.state || "")) ||
+        String(a.originalBill || "").localeCompare(String(b.originalBill || ""));
     });
   }
 
+  function renderStatePolicyExplorer() {
+    var records = filteredPolicies();
+    var list = $("#policy-list");
+    var allRecords = typeof STATE_AV_LAWS !== "undefined" && Array.isArray(STATE_AV_LAWS) ? STATE_AV_LAWS : [];
+    list.innerHTML = "";
+    $("#result-count").textContent = "Showing " + records.length + " of " + allRecords.length + " state AV law " +
+      (allRecords.length === 1 ? "record" : "records");
+
+    if (!records.length) {
+      var selected = US_STATES.find(function (stateInfo) { return stateInfo.code === state.jurisdiction; });
+      list.appendChild(create(
+        "div",
+        "empty-state",
+        selected
+          ? "No matching " + (state.recordType || "AV law") + " record has been added for " + selected.name + "."
+          : "No matching state AV law records have been added to data.js."
+      ));
+    }
+
+    records.forEach(function (record) {
+      var card = create("article", "policy-card state-policy-card");
+      var meta = create("div", "policy-meta");
+      meta.appendChild(create("span", "effect binding", record.code));
+      meta.appendChild(create("span", null, "AV statute: " + (record.avSpecificStatute || "Not provided")));
+      [
+        ["Bill", "bill"],
+        ["Act", "act"],
+        ["Code", "code"]
+      ].forEach(function (type) {
+        if (recordHasType(record, type[1])) {
+          meta.appendChild(create("span", "record-type-present", type[0]));
+        }
+      });
+      card.appendChild(meta);
+
+      var body = create("div");
+      body.appendChild(create("h3", null, record.state));
+      body.appendChild(create("p", "policy-issuer", record.currentLegalStatus || "Current legal status not provided"));
+      var details = create("dl", "explorer-record-details");
+      [
+        ["Bill", "originalBill", "bill"],
+        ["Act", "enactedAct", "act"],
+        ["Code", "currentCodeCitation", "code"]
+      ].forEach(function (field) {
+        if (state.recordType && state.recordType !== field[2]) { return; }
+        var supplied = hasSuppliedValue(record[field[1]]);
+        var row = create("div", "explorer-record-field");
+        row.appendChild(create("dt", null, field[0]));
+        row.appendChild(create("dd", supplied ? null : "not-provided", supplied ? record[field[1]] : "Not provided"));
+        details.appendChild(row);
+      });
+      body.appendChild(details);
+      card.appendChild(body);
+
+      var actions = create("div", "policy-actions");
+      var viewState = create("button", null, "View on map");
+      viewState.type = "button";
+      viewState.addEventListener("click", function () {
+        var mapSelect = $("#state-map-select");
+        mapSelect.value = record.code;
+        mapSelect.dispatchEvent(new Event("change"));
+        $("#state-map").scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+      actions.appendChild(viewState);
+      if (record.url) {
+        var source = create("a", null, "View supplied source");
+        source.href = record.url;
+        source.target = "_blank";
+        source.rel = "noopener";
+        actions.appendChild(source);
+      }
+      card.appendChild(actions);
+      list.appendChild(card);
+    });
+    syncUrl();
+  }
+
   function renderPolicies() {
+    renderStatePolicyExplorer();
+    return;
     var records = filteredPolicies();
     var list = $("#policy-list");
     list.innerHTML = "";
@@ -668,7 +725,7 @@
     if (!records.length) {
       list.appendChild(create("div", "empty-state", POLICIES.length
         ? "No policy sources match this view. Reset the filters to continue."
-        : "No policy sources have been added yet. Add the project-owner-supplied records to data.js."));
+        : "No policy sources have been added yet. Add records to data.js."));
     }
     records.forEach(function (policy) {
       var card = create("article", "policy-card");
@@ -793,13 +850,13 @@
       button.addEventListener("click", function () {
         var scope = button.dataset.policyScope;
         if (scope === "federal-responsibility") {
-          setExplorerFilters({ jurisdiction: "Federal", effect: "binding" });
+          setExplorerFilters({});
         } else if (scope === "state-responsibility") {
-          setExplorerFilters({ jurisdiction: "States & DC" });
+          setExplorerFilters({});
         } else if (scope === "federal-framework") {
-          setExplorerFilters({ jurisdiction: "Federal", effect: "guidance" });
+          setExplorerFilters({});
         } else if (scope === "state-bills") {
-          setExplorerFilters({ jurisdiction: "States & DC" });
+          setExplorerFilters({ recordType: "bill" });
         }
         $("#explorer").scrollIntoView({ behavior: "smooth", block: "start" });
       });

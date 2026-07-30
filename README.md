@@ -22,7 +22,7 @@ This website provides a structured review of autonomous-vehicle laws, regulation
 ## Website files
 
 - `index.html` — webpage structure and visible sections
-- `data.js` — policy records and source links supplied by the project owner
+- `data.js` — policy records and source links
 - `app.js` — search, filtering, and interactive functions
 - `style.css` — colors, fonts, spacing, and layout
 
@@ -33,7 +33,7 @@ Add state and District of Columbia AV statutes and bills to the
 state, AV-specific statute and regulation, current legal status, original
 bill/file, sponsor, committee, enacted act, code citation, safety-driver
 requirements, liability coverage, commercial deployment, procedure, and
-an optional owner-supplied source URL.
+an optional source URL.
 
 The geographic interface uses Leaflet 1.9.4, an OpenStreetMap basemap,
 and a generalized 50-state-and-D.C. boundary layer served by the
