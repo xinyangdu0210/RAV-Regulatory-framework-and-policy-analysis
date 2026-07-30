@@ -465,6 +465,22 @@
   }
 
   function setupUtilities() {
+    $$(".policy-entry [data-policy-scope]").forEach(function (button) {
+      button.addEventListener("click", function () {
+        var scope = button.dataset.policyScope;
+        if (scope === "federal-responsibility") {
+          setExplorerFilters({ jurisdiction: "Federal", effect: "binding" });
+        } else if (scope === "state-responsibility") {
+          setExplorerFilters({ jurisdiction: "Georgia", effect: "binding" });
+        } else if (scope === "federal-framework") {
+          setExplorerFilters({ jurisdiction: "Federal", effect: "guidance" });
+        } else if (scope === "state-bills") {
+          setExplorerFilters({ jurisdiction: "Georgia", search: "state law" });
+        }
+        $("#explorer").scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+    });
+
     $("#compare-trigger").addEventListener("click", openDrawer);
     $("#compare-close").addEventListener("click", closeDrawer);
     $("#drawer-scrim").addEventListener("click", closeDrawer);

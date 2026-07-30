@@ -15,6 +15,17 @@ This is an educational planning resource, not legal advice. Applicability depend
 
 There is no build step.
 
+For the easiest editing workflow, run:
+
+```powershell
+.\preview.ps1
+```
+
+This opens the website at `http://127.0.0.1:8000/`. Edit and save
+`data.js`, then refresh the browser to see the updated content.
+
+Alternatively:
+
 ```powershell
 cd "RAV policy"
 python -m http.server 8000
