@@ -120,14 +120,6 @@
     return node;
   }
 
-  function createSvg(tag, attributes) {
-    var node = document.createElementNS("http://www.w3.org/2000/svg", tag);
-    Object.keys(attributes || {}).forEach(function (name) {
-      node.setAttribute(name, attributes[name]);
-    });
-    return node;
-  }
-
   var state = {
     search: "",
     jurisdiction: "",
@@ -244,21 +236,9 @@
   }
 
   function renderStateMap() {
-    var map = $("#us-map");
+    var mapNode = $("#us-map");
     var select = $("#state-map-select");
-    if (!map || !select) { return; }
-
-    var svg = createSvg("svg", {
-      viewBox: "0 0 900 420",
-      role: "group",
-      "aria-label": "Select a state or the District of Columbia"
-    });
-    var tileWidth = 62;
-    var tileHeight = 48;
-    var stepX = 68;
-    var stepY = 57;
-    var offsetX = 7;
-    var offsetY = 14;
+    if (!mapNode || !select) { return; }
 
     US_STATES.slice().sort(function (a, b) { return a.name.localeCompare(b.name); }).forEach(function (stateInfo) {
       var option = create("option", null, stateInfo.name);
@@ -266,61 +246,167 @@
       select.appendChild(option);
     });
 
-    US_STATES.forEach(function (stateInfo) {
-      var count = stateLawRecords(stateInfo.code).length;
-      var group = createSvg("g", {
-        class: "state-tile" + (count ? " has-records" : ""),
-        transform: "translate(" + (offsetX + stateInfo.x * stepX) + " " + (offsetY + stateInfo.y * stepY) + ")",
-        role: "button",
-        tabindex: "0",
-        "data-state-code": stateInfo.code,
-        "aria-label": stateInfo.name + ": " + count + " AV " + (count === 1 ? "record" : "records")
-      });
-      group.appendChild(createSvg("rect", { width: tileWidth, height: tileHeight, rx: "8", ry: "8" }));
-      var label = createSvg("text", { x: tileWidth / 2, y: "29", "text-anchor": "middle" });
-      label.textContent = stateInfo.code;
-      group.appendChild(label);
-      var badge = createSvg("circle", { cx: "53", cy: "8", r: "7", class: "state-count-badge" });
-      group.appendChild(badge);
-      var badgeText = createSvg("text", { x: "53", y: "11", "text-anchor": "middle", class: "state-count-text" });
-      badgeText.textContent = count ? String(Math.min(count, 9)) : "";
-      group.appendChild(badgeText);
+    var map = null;
+    var boundaryLayer = null;
+    var dcMarker = null;
+    var stateLayers = {};
+    var continentalBounds = [[24.2, -125.2], [50, -66.2]];
 
-      var selectState = function () {
-        state.selectedState = stateInfo.code;
-        $$(".state-tile", svg).forEach(function (tile) {
-          tile.classList.toggle("selected", tile.dataset.stateCode === stateInfo.code);
-          tile.setAttribute("aria-pressed", String(tile.dataset.stateCode === stateInfo.code));
-        });
-        select.value = stateInfo.code;
-        renderStatePanel(stateInfo);
-        syncUrl();
+    function styleFor(code, selected) {
+      var hasRecords = stateLawRecords(code).length > 0;
+      return {
+        color: selected ? "#102a2a" : "#5277c9",
+        weight: selected ? 3.2 : 1.35,
+        opacity: 1,
+        fillColor: selected ? "#cce83a" : (hasRecords ? "#cce83a" : "#fffdf7"),
+        fillOpacity: selected ? .58 : (hasRecords ? .38 : .16)
       };
-      group.addEventListener("click", selectState);
-      group.addEventListener("keydown", function (event) {
-        if (event.key === "Enter" || event.key === " ") {
-          event.preventDefault();
-          selectState();
+    }
+
+    function selectState(stateInfo, focusLayer) {
+      if (!stateInfo) { return; }
+      state.selectedState = stateInfo.code;
+      select.value = stateInfo.code;
+      renderStatePanel(stateInfo);
+      syncUrl();
+
+      if (boundaryLayer) {
+        boundaryLayer.eachLayer(function (layer) {
+          var code = layer.feature && layer.feature.properties.state_abbr;
+          if (code) { layer.setStyle(styleFor(code, code === stateInfo.code)); }
+        });
+      }
+      if (stateLayers[stateInfo.code]) {
+        stateLayers[stateInfo.code].bringToFront();
+        if (focusLayer) {
+          map.fitBounds(stateLayers[stateInfo.code].getBounds(), {
+            padding: [32, 32],
+            maxZoom: stateInfo.code === "AK" ? 4 : 6
+          });
         }
-      });
-      svg.appendChild(group);
-    });
+      }
+      if (dcMarker) {
+        dcMarker.setStyle({
+          fillColor: stateInfo.code === "DC" ? "#cce83a" : "#fffdf7"
+        });
+      }
+    }
 
     select.addEventListener("change", function () {
-      var stateInfo = US_STATES.find(function (item) { return item.code === select.value; });
-      if (!stateInfo) { return; }
-      var tile = $('.state-tile[data-state-code="' + stateInfo.code + '"]', svg);
-      if (tile) {
-        tile.dispatchEvent(new MouseEvent("click", { bubbles: true }));
-        tile.focus();
+      selectState(US_STATES.find(function (item) { return item.code === select.value; }), true);
+    });
+
+    if (typeof L === "undefined") {
+      mapNode.classList.add("map-load-error");
+      mapNode.textContent = "The geographic map library could not load. Use the jurisdiction menu to view state records.";
+      if (state.selectedState) {
+        selectState(US_STATES.find(function (item) { return item.code === state.selectedState; }), false);
+      }
+      return;
+    }
+
+    map = L.map(mapNode, {
+      minZoom: 3,
+      maxZoom: 8,
+      scrollWheelZoom: false,
+      zoomControl: true
+    });
+    L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      maxZoom: 19,
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(map);
+    map.fitBounds(continentalBounds, { padding: [10, 10] });
+
+    var viewsControl = L.control({ position: "bottomleft" });
+    viewsControl.onAdd = function () {
+      var control = L.DomUtil.create("div", "state-map-views leaflet-bar");
+      [
+        { label: "U.S.", title: "Return to the contiguous United States", action: function () {
+          map.fitBounds(continentalBounds, { padding: [10, 10] });
+        } },
+        { label: "AK", title: "View Alaska", code: "AK" },
+        { label: "HI", title: "View Hawaii", code: "HI" }
+      ].forEach(function (item) {
+        var button = create("button", null, item.label);
+        button.type = "button";
+        button.title = item.title;
+        button.setAttribute("aria-label", item.title);
+        button.addEventListener("click", function () {
+          if (item.action) {
+            item.action();
+          } else {
+            selectState(US_STATES.find(function (stateInfo) { return stateInfo.code === item.code; }), true);
+          }
+        });
+        control.appendChild(button);
+      });
+      L.DomEvent.disableClickPropagation(control);
+      L.DomEvent.disableScrollPropagation(control);
+      return control;
+    };
+    viewsControl.addTo(map);
+
+    var boundaryUrl = "https://gisportal.ers.usda.gov/server/rest/services/Hosted/US_State_Boundaries/FeatureServer/0/query" +
+      "?where=1%3D1&outFields=state_name%2Cstate_abbr&returnGeometry=true&outSR=4326&f=geojson";
+
+    fetch(boundaryUrl).then(function (response) {
+      if (!response.ok) { throw new Error("Boundary request failed"); }
+      return response.json();
+    }).then(function (geojson) {
+      boundaryLayer = L.geoJSON(geojson, {
+        style: function (feature) {
+          return styleFor(feature.properties.state_abbr, feature.properties.state_abbr === state.selectedState);
+        },
+        onEachFeature: function (feature, layer) {
+          var code = feature.properties.state_abbr;
+          var stateInfo = US_STATES.find(function (item) { return item.code === code; });
+          if (!stateInfo) { return; }
+          stateLayers[code] = layer;
+          if (code !== "DC") {
+            layer.bindTooltip(code, {
+              permanent: true,
+              direction: "center",
+              className: "state-map-label"
+            });
+          }
+          layer.on({
+            mouseover: function () {
+              layer.setStyle({ weight: 3, fillOpacity: .4 });
+              layer.bringToFront();
+            },
+            mouseout: function () {
+              layer.setStyle(styleFor(code, code === state.selectedState));
+            },
+            click: function () { selectState(stateInfo, false); }
+          });
+        }
+      }).addTo(map);
+
+      var dcInfo = US_STATES.find(function (item) { return item.code === "DC"; });
+      dcMarker = L.circleMarker([38.9072, -77.0369], {
+        radius: 7,
+        color: "#102a2a",
+        weight: 2,
+        fillColor: state.selectedState === "DC" ? "#cce83a" : "#fffdf7",
+        fillOpacity: .95
+      }).addTo(map);
+      dcMarker.bindTooltip("DC", {
+        permanent: true,
+        direction: "right",
+        className: "state-map-label"
+      });
+      dcMarker.on("click", function () { selectState(dcInfo, false); });
+
+      if (state.selectedState) {
+        selectState(US_STATES.find(function (item) { return item.code === state.selectedState; }), false);
+      }
+    }).catch(function () {
+      var notice = create("div", "map-error-notice", "State boundaries could not load. Use the jurisdiction menu to view records.");
+      mapNode.appendChild(notice);
+      if (state.selectedState) {
+        selectState(US_STATES.find(function (item) { return item.code === state.selectedState; }), false);
       }
     });
-    map.appendChild(svg);
-
-    if (state.selectedState) {
-      var initialTile = $('.state-tile[data-state-code="' + state.selectedState + '"]', svg);
-      if (initialTile) { initialTile.dispatchEvent(new MouseEvent("click", { bubbles: true })); }
-    }
   }
 
   function renderDomains() {

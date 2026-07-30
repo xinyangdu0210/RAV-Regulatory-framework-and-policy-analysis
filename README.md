@@ -33,6 +33,11 @@ Add state and District of Columbia AV statutes and bills to the
 two-letter code, title, statutory citation, bill number, status, year,
 summary, and source URL.
 
+The geographic interface uses Leaflet 1.9.4, an OpenStreetMap basemap,
+and a generalized 50-state-and-D.C. boundary layer served by the
+U.S. Department of Agriculture. An internet connection is required to
+load the basemap and state boundaries.
+
 ## Disclaimer
 
 This website is an educational and research resource and does not constitute legal advice. Requirements may vary depending on the vehicle, operator, service type, and jurisdiction.
