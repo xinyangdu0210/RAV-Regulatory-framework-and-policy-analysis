@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>RAV Policy Navigator</title>
+  <meta name="description" content="An interactive U.S. federal and Georgia policy navigator for rural autonomous vehicle planning.">
+  <meta name="theme-color" content="#102a2a">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <div class="progress" aria-hidden="true"><span id="progress-bar"></span></div>
+
+  <header class="site-header">
+    <a class="brand" href="#overview" aria-label="RAV Policy Navigator home">
+      <span class="brand-mark" aria-hidden="true">RP</span>
+      <span>RAV Policy <b>Navigator</b></span>
+    </a>
+    <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav">Menu</button>
+    <nav id="site-nav" aria-label="Main navigation">
+      <a href="#framework">Framework</a>
+      <a href="#landscape">Landscape</a>
+      <a href="#readiness">Readiness</a>
+      <a href="#explorer">Policy explorer</a>
+      <a href="#roadmap">Roadmap</a>
+    </nav>
+    <button class="compare-trigger" id="compare-trigger" type="button" aria-controls="compare-drawer" aria-expanded="false">
+      Compare <span id="compare-count">0</span>
+    </button>
+  </header>
+
+  <main id="main">
+    <section class="hero" id="overview">
+      <div class="hero-grid" aria-hidden="true"></div>
+      <div class="hero-copy">
+        <p class="eyebrow">Policy intelligence for rural deployment</p>
+        <h1>Move from autonomous-vehicle policy to a <em>deployable rural service.</em></h1>
+        <p class="hero-lede">Explore how federal vehicle rules, Georgia operating law, infrastructure policy, accessibility, cybersecurity, and transit requirements fit together.</p>
+        <div class="hero-actions">
+          <a class="button primary" href="#readiness">Assess a project</a>
+          <a class="button ghost" href="#explorer">Explore policy sources</a>
+        </div>
+        <dl class="hero-stats">
+          <div><dt id="stat-policies">20</dt><dd>official policy sources</dd></div>
+          <div><dt id="stat-binding">9</dt><dd>binding instruments</dd></div>
+          <div><dt>2</dt><dd>policy layers</dd></div>
+          <div><dt>6</dt><dd>decision domains</dd></div>
+        </dl>
+      </div>
+      <div class="hero-visual" aria-label="Federal, state, and project policy layers">
+        <div class="orbit orbit-one"></div>
+        <div class="orbit orbit-two"></div>
+        <div class="policy-core">
+          <span>Rural service</span>
+          <strong>Policy-ready</strong>
+          <small>safe · accessible · accountable</small>
+        </div>
+        <div class="layer-card federal"><span>01</span><b>Federal</b><small>vehicle + safety</small></div>
+        <div class="layer-card state"><span>02</span><b>Georgia</b><small>operation + registration</small></div>
+        <div class="layer-card project"><span>03</span><b>Project</b><small>ODD + governance</small></div>
+      </div>
+    </section>
+
+    <aside class="scope-note">
+      <strong>Initial scope</strong>
+      <span>United States federal policy + Georgia implementation context</span>
+      <span>Verified <time datetime="2026-07-30">July 30, 2026</time></span>
+      <span>Educational resource — not legal advice</span>
+    </aside>
+
+    <section class="section" id="framework">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">One deployment, six policy questions</p>
+          <h2>The RAV policy framework</h2>
+        </div>
+        <p>Policy readiness is a system. Select a domain to see its decision, rural pressure point, and linked official sources.</p>
+      </div>
+      <div class="domain-layout">
+        <div class="domain-wheel" id="domain-wheel" aria-label="Policy domains"></div>
+        <article class="domain-detail" id="domain-detail" aria-live="polite"></article>
+      </div>
+    </section>
+
+    <section class="section dark-section" id="landscape">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Authority × decision domain</p>
+          <h2>Policy landscape</h2>
+        </div>
+        <p>Use the matrix to identify where federal requirements lead, where Georgia rules apply, and where project governance must close the gap.</p>
+      </div>
+      <div class="legend-row">
+        <span><i class="dot binding"></i> Binding</span>
+        <span><i class="dot guidance"></i> Guidance or resource</span>
+        <span>Click a cell to filter the explorer</span>
+      </div>
+      <div class="matrix-scroll">
+        <div class="policy-matrix" id="policy-matrix"></div>
+      </div>
+    </section>
+
+    <section class="section assessment-section" id="readiness">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Project diagnostic</p>
+          <h2>Rural policy readiness check</h2>
+        </div>
+        <p>Score a proposed pilot across the six domains. The result is a planning prompt, not a legal determination.</p>
+      </div>
+      <div class="assessment-grid">
+        <form class="assessment-form" id="assessment-form"></form>
+        <article class="score-card" id="score-card" aria-live="polite">
+          <div class="score-ring" id="score-ring"><strong id="score-value">0</strong><span>/ 100</span></div>
+          <p class="score-label">Readiness posture</p>
+          <h3 id="score-posture">Complete the assessment</h3>
+          <p id="score-summary">Choose a response for each domain to build a prioritized policy worklist.</p>
+          <div id="score-actions"></div>
+          <button class="button primary" id="score-explore" type="button">Explore priority policies</button>
+        </article>
+      </div>
+    </section>
+
+    <section class="section" id="explorer">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Official-source database</p>
+          <h2>Policy explorer</h2>
+        </div>
+        <p>Filter by authority, domain, instrument status, or binding effect. Open every record at its official source.</p>
+      </div>
+      <div class="toolbar">
+        <label class="search-field">
+          <span>Search policy sources</span>
+          <input id="search" type="search" placeholder="Search title, agency, action…">
+        </label>
+        <label>
+          <span>Jurisdiction</span>
+          <select id="jurisdiction-filter"><option value="">All jurisdictions</option></select>
+        </label>
+        <label>
+          <span>Domain</span>
+          <select id="domain-filter"><option value="">All domains</option></select>
+        </label>
+        <label>
+          <span>Effect</span>
+          <select id="effect-filter">
+            <option value="">Binding + guidance</option>
+            <option value="binding">Binding</option>
+            <option value="guidance">Guidance / resource</option>
+          </select>
+        </label>
+        <button id="reset-filters" class="button small" type="button">Reset</button>
+      </div>
+      <div class="explorer-status">
+        <p id="result-count" aria-live="polite"></p>
+        <button id="copy-link" class="text-button" type="button">Copy this view</button>
+      </div>
+      <div class="policy-list" id="policy-list"></div>
+    </section>
+
+    <section class="section roadmap-section" id="roadmap">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">From concept to accountable operation</p>
+          <h2>A policy-first deployment roadmap</h2>
+        </div>
+        <p>The sequence keeps procurement from outrunning authority, safety evidence, community design, or operational controls.</p>
+      </div>
+      <ol class="roadmap">
+        <li>
+          <span>01</span>
+          <div><p>Frame</p><h3>Define service and authority</h3><small>Public purpose · lead agency · jurisdiction · funding conditions</small></div>
+        </li>
+        <li>
+          <span>02</span>
+          <div><p>Bound</p><h3>Set the rural ODD</h3><small>Roads · weather · speed · connectivity · fallback</small></div>
+        </li>
+        <li>
+          <span>03</span>
+          <div><p>Assure</p><h3>Build the safety case</h3><small>Compliance · validation · incidents · reporting · exemptions</small></div>
+        </li>
+        <li>
+          <span>04</span>
+          <div><p>Include</p><h3>Design the complete service</h3><small>Accessibility · booking · assistance · privacy · public engagement</small></div>
+        </li>
+        <li>
+          <span>05</span>
+          <div><p>Operate</p><h3>Authorize a measurable pilot</h3><small>Roles · training · metrics · stop rules · independent review</small></div>
+        </li>
+        <li>
+          <span>06</span>
+          <div><p>Learn</p><h3>Publish and decide</h3><small>Results · incidents · equity · costs · scale, revise, or stop</small></div>
+        </li>
+      </ol>
+    </section>
+
+    <section class="section source-section" id="sources">
+      <div>
+        <p class="eyebrow">Method and limitations</p>
+        <h2>Built for traceable policy planning</h2>
+      </div>
+      <div class="source-copy">
+        <p>Every explorer record links to a U.S. or Georgia government source. “Binding” identifies a law, regulation, order, or administrative requirement in this planning dataset; applicability still depends on the vehicle, service, funding, operator, location, and facts.</p>
+        <p>Policy changes quickly. Confirm current requirements with the responsible agency and qualified counsel before procurement, testing, or deployment.</p>
+        <a href="#explorer" class="button ghost">Review all official sources</a>
+      </div>
+    </section>
+  </main>
+
+  <aside class="compare-drawer" id="compare-drawer" aria-label="Policy comparison" aria-hidden="true">
+    <div class="drawer-head">
+      <div><p class="eyebrow">Working set</p><h2>Compare policies</h2></div>
+      <button id="compare-close" type="button" aria-label="Close comparison">×</button>
+    </div>
+    <p class="drawer-help">Save up to three sources to compare authority, effect, and rural implementation action.</p>
+    <div id="compare-list"></div>
+    <div class="drawer-actions">
+      <button class="button small" id="compare-export" type="button">Export CSV</button>
+      <button class="text-button" id="compare-clear" type="button">Clear all</button>
+    </div>
+  </aside>
+  <div class="drawer-scrim" id="drawer-scrim"></div>
+
+  <footer>
+    <div class="brand"><span class="brand-mark">RP</span><span>RAV Policy <b>Navigator</b></span></div>
+    <p>Initial U.S. federal + Georgia edition · Verified July 30, 2026</p>
+    <a href="#overview">Back to top ↑</a>
+  </footer>
+
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
