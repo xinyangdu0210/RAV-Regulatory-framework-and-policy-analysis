@@ -465,7 +465,7 @@
   }
 
   function setupUtilities() {
-    $$(".policy-entry [data-policy-scope]").forEach(function (button) {
+    $$("[data-policy-scope]").forEach(function (button) {
       button.addEventListener("click", function () {
         var scope = button.dataset.policyScope;
         if (scope === "federal-responsibility") {

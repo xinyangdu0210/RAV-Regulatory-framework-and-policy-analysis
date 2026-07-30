@@ -94,16 +94,22 @@ a { color: inherit; }
   align-items: center;
   gap: 6px;
 }
-.site-header nav a {
+.site-header nav a,
+.site-header nav button {
   padding: 9px 11px;
+  border: 0;
   border-radius: 6px;
   text-decoration: none;
   color: rgba(255,255,255,.74);
+  background: transparent;
   font-size: 13px;
   font-weight: 700;
+  cursor: pointer;
 }
 .site-header nav a:hover,
-.site-header nav a.active { color: #fff; background: rgba(255,255,255,.09); }
+.site-header nav a.active,
+.site-header nav button:hover,
+.site-header nav button.active { color: #fff; background: rgba(255,255,255,.09); }
 .nav-toggle { display: none; }
 .compare-trigger {
   border: 1px solid rgba(255,255,255,.26);
@@ -694,6 +700,7 @@ footer .brand { color: #fff; }
 @media (max-width: 1080px) {
   .site-header nav { display: none; position: absolute; left: 0; right: 0; top: 74px; padding: 15px 24px 22px; background: var(--ink); flex-direction: column; align-items: stretch; }
   .site-header nav.open { display: flex; }
+  .site-header nav button { width: 100%; text-align: left; }
   .nav-toggle { display: inline-block; margin-left: auto; border: 1px solid rgba(255,255,255,.25); border-radius: 5px; padding: 8px 11px; color: #fff; background: transparent; }
   .compare-trigger { margin-left: 0; }
   .policy-entry { grid-template-columns: repeat(2, 1fr); }
