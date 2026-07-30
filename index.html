@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>RAV Policy Navigator</title>
-  <meta name="description" content="An interactive U.S. federal and Georgia policy navigator for rural autonomous vehicle planning.">
+  <title>RAV Policy</title>
+  <meta name="description" content="An interactive U.S. federal, 50-state, and District of Columbia policy resource for rural autonomous vehicle planning.">
   <meta name="theme-color" content="#102a2a">
   <link rel="stylesheet" href="style.css">
 </head>
@@ -13,20 +13,10 @@
   <div class="progress" aria-hidden="true"><span id="progress-bar"></span></div>
 
   <header class="site-header">
-    <a class="brand" href="#overview" aria-label="RAV Policy Navigator home">
+    <a class="brand" href="#overview" aria-label="RAV Policy home">
       <span class="brand-mark" aria-hidden="true">RP</span>
-      <span>RAV Policy <b>Navigator</b></span>
+      <span>RAV Policy</span>
     </a>
-    <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav">Menu</button>
-    <nav id="site-nav" aria-label="Main navigation">
-      <button type="button" data-policy-scope="federal-responsibility">Federal responsibility</button>
-      <button type="button" data-policy-scope="state-responsibility">State responsibility</button>
-      <button type="button" data-policy-scope="federal-framework">Federal policy framework</button>
-      <button type="button" data-policy-scope="state-bills">State bills</button>
-    </nav>
-    <button class="compare-trigger" id="compare-trigger" type="button" aria-controls="compare-drawer" aria-expanded="false">
-      Compare <span id="compare-count">0</span>
-    </button>
   </header>
 
   <main id="main">
@@ -41,7 +31,7 @@
         <span>02</span>
         <strong>State responsibility</strong>
         <small>Road operation, registration, insurance, traffic law, licensing, and incident duties</small>
-        <b>View Georgia requirements →</b>
+        <b>View state and D.C. requirements →</b>
       </button>
       <button type="button" data-policy-scope="federal-framework">
         <span>03</span>
@@ -52,7 +42,7 @@
       <button type="button" data-policy-scope="state-bills">
         <span>04</span>
         <strong>State bills</strong>
-        <small>Enacted legislation governing fully autonomous vehicles, beginning with Georgia SB 219</small>
+        <small>Introduced and enacted autonomous-vehicle legislation across all 50 states and D.C.</small>
         <b>View state legislation →</b>
       </button>
     </section>
@@ -62,14 +52,14 @@
       <div class="hero-copy">
         <p class="eyebrow">Policy intelligence for rural deployment</p>
         <h1>Move from autonomous-vehicle policy to a <em>deployable rural service.</em></h1>
-        <p class="hero-lede">Explore how federal vehicle rules, Georgia operating law, infrastructure policy, accessibility, cybersecurity, and transit requirements fit together.</p>
+        <p class="hero-lede">Explore how federal vehicle rules and the operating laws of all 50 states and D.C. fit with infrastructure, accessibility, cybersecurity, and transit requirements.</p>
         <div class="hero-actions">
           <a class="button primary" href="#readiness">Assess a project</a>
           <a class="button ghost" href="#explorer">Explore policy sources</a>
         </div>
         <dl class="hero-stats">
-          <div><dt id="stat-policies">20</dt><dd>official policy sources</dd></div>
-          <div><dt id="stat-binding">10</dt><dd>binding instruments</dd></div>
+          <div><dt id="stat-policies">0</dt><dd>policy sources</dd></div>
+          <div><dt id="stat-binding">0</dt><dd>binding instruments</dd></div>
           <div><dt>2</dt><dd>policy layers</dd></div>
           <div><dt>6</dt><dd>decision domains</dd></div>
         </dl>
@@ -91,8 +81,8 @@
 
     <aside class="scope-note">
       <strong>Initial scope</strong>
-      <span>United States federal policy + Georgia implementation context</span>
-      <span>Verified <time datetime="2026-07-30">July 30, 2026</time></span>
+      <span>United States federal policy + all 50 states and the District of Columbia</span>
+      <span>Sources pending project-owner submission</span>
       <span>Educational resource — not legal advice</span>
     </aside>
 
@@ -102,7 +92,7 @@
           <p class="eyebrow">One deployment, six policy questions</p>
           <h2>The RAV policy framework</h2>
         </div>
-        <p>Policy readiness is a system. Select a domain to see its decision, rural pressure point, and linked official sources.</p>
+        <p>Policy readiness is a system. Select a domain to see its decision, rural pressure point, and linked policy sources.</p>
       </div>
       <div class="domain-layout">
         <div class="domain-wheel" id="domain-wheel" aria-label="Policy domains"></div>
@@ -116,7 +106,7 @@
           <p class="eyebrow">Authority × decision domain</p>
           <h2>Policy landscape</h2>
         </div>
-        <p>Use the matrix to identify where federal requirements lead, where Georgia rules apply, and where project governance must close the gap.</p>
+        <p>Use the matrix to identify where federal requirements lead, where state and D.C. rules apply, and where project governance must close the gap.</p>
       </div>
       <div class="legend-row">
         <span><i class="dot binding"></i> Binding</span>
@@ -152,10 +142,10 @@
     <section class="section" id="explorer">
       <div class="section-heading">
         <div>
-          <p class="eyebrow">Official-source database</p>
+          <p class="eyebrow">Policy-source database</p>
           <h2>Policy explorer</h2>
         </div>
-        <p>Filter by authority, domain, instrument status, or binding effect. Open every record at its official source.</p>
+        <p>Filter by authority, domain, instrument status, or binding effect. Open every record at its cited source.</p>
       </div>
       <div class="toolbar">
         <label class="search-field">
@@ -229,9 +219,8 @@
         <h2>Built for traceable policy planning</h2>
       </div>
       <div class="source-copy">
-        <p>Every explorer record links to a U.S. or Georgia government source. “Binding” identifies a law, regulation, order, or administrative requirement in this planning dataset; applicability still depends on the vehicle, service, funding, operator, location, and facts.</p>
+        <p>Policy records and links will be added only from federal and state bill sources supplied by the project owner. The website does not generate or select policy sources automatically.</p>
         <p>Policy changes quickly. Confirm current requirements with the responsible agency and qualified counsel before procurement, testing, or deployment.</p>
-        <a href="#explorer" class="button ghost">Review all official sources</a>
       </div>
     </section>
   </main>
@@ -251,8 +240,8 @@
   <div class="drawer-scrim" id="drawer-scrim"></div>
 
   <footer>
-    <div class="brand"><span class="brand-mark">RP</span><span>RAV Policy <b>Navigator</b></span></div>
-    <p>Initial U.S. federal + Georgia edition · Verified July 30, 2026</p>
+    <div class="brand"><span class="brand-mark">RP</span><span>RAV Policy</span></div>
+    <p>U.S. federal + 50 states and D.C. edition · Sources pending</p>
     <a href="#overview">Back to top ↑</a>
   </footer>
 

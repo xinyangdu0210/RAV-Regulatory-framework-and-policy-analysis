@@ -86,6 +86,12 @@
     return Array.from(new Set(POLICIES.map(function (policy) { return policy[field]; }))).sort();
   }
 
+  function matchesJurisdiction(policy, jurisdiction) {
+    if (!jurisdiction) { return true; }
+    if (jurisdiction === "States & DC") { return policy.jurisdiction !== "Federal"; }
+    return policy.jurisdiction === jurisdiction;
+  }
+
   function hydrateState() {
     if (!window.URLSearchParams) { return; }
     var params = new URLSearchParams(location.search);
@@ -118,7 +124,7 @@
       button.type = "button";
       button.dataset.number = String(index + 1).padStart(2, "0");
       button.dataset.domain = domain;
-      button.appendChild(create("span", null, count + " official sources"));
+      button.appendChild(create("span", null, count + " policy sources"));
       button.appendChild(create("strong", null, domain));
       button.appendChild(create("small", null, DOMAIN_INFO[domain].question));
       button.addEventListener("click", function () { selectDomain(domain); });
@@ -141,7 +147,7 @@
     [
       ["Rural pressure point", info.pressure],
       ["Required project artifact", info.deliverable],
-      ["Official sources in this edition", String(POLICIES.filter(function (policy) { return policy.domain === domain; }).length)]
+      ["Policy sources in this edition", String(POLICIES.filter(function (policy) { return policy.domain === domain; }).length)]
     ].forEach(function (item) {
       var row = create("div");
       row.appendChild(create("dt", null, item[0]));
@@ -162,11 +168,11 @@
     var matrix = $("#policy-matrix");
     matrix.appendChild(create("div", "matrix-label header", "Authority"));
     DOMAINS.forEach(function (domain) { matrix.appendChild(create("div", "matrix-label header", domain)); });
-    ["Federal", "Georgia"].forEach(function (jurisdiction) {
+    ["Federal", "States & DC"].forEach(function (jurisdiction) {
       matrix.appendChild(create("div", "matrix-label", jurisdiction));
       DOMAINS.forEach(function (domain) {
         var records = POLICIES.filter(function (policy) {
-          return policy.jurisdiction === jurisdiction && policy.domain === domain;
+          return matchesJurisdiction(policy, jurisdiction) && policy.domain === domain;
         });
         var binding = records.filter(function (policy) { return policy.binding; }).length;
         var guidance = records.length - binding;
@@ -174,7 +180,7 @@
         cell.type = "button";
         cell.setAttribute("aria-label", jurisdiction + ", " + domain + ": " + records.length + " sources");
         cell.appendChild(create("strong", null, String(records.length)));
-        cell.appendChild(create("small", null, records.length ? "official source" + (records.length === 1 ? "" : "s") : "no source in edition"));
+        cell.appendChild(create("small", null, records.length ? "policy source" + (records.length === 1 ? "" : "s") : "no source in edition"));
         var dots = create("span", "matrix-dots");
         for (var i = 0; i < Math.min(binding, 4); i++) { dots.appendChild(create("i", "dot binding")); }
         for (var j = 0; j < Math.min(guidance, 4); j++) { dots.appendChild(create("i", "dot guidance")); }
@@ -272,7 +278,9 @@
 
   function populateFilters() {
     var jurisdiction = $("#jurisdiction-filter");
-    unique("jurisdiction").forEach(function (value) {
+    ["Federal", "States & DC"].concat(unique("jurisdiction").filter(function (value) {
+      return value !== "Federal" && value !== "States & DC";
+    })).forEach(function (value) {
       var option = create("option", null, value);
       option.value = value;
       jurisdiction.appendChild(option);
@@ -329,7 +337,7 @@
         policy.title, policy.issuer, policy.summary, policy.ruralAction,
         policy.domain, policy.instrument, policy.status
       ].join(" ").toLowerCase().indexOf(query) === -1) { return false; }
-      if (state.jurisdiction && policy.jurisdiction !== state.jurisdiction) { return false; }
+      if (!matchesJurisdiction(policy, state.jurisdiction)) { return false; }
       if (state.domain && policy.domain !== state.domain) { return false; }
       if (state.priorityDomains.length && state.priorityDomains.indexOf(policy.domain) === -1) { return false; }
       if (state.effect === "binding" && !policy.binding) { return false; }
@@ -344,10 +352,12 @@
     var records = filteredPolicies();
     var list = $("#policy-list");
     list.innerHTML = "";
-    $("#result-count").textContent = "Showing " + records.length + " of " + POLICIES.length + " official sources" +
+    $("#result-count").textContent = "Showing " + records.length + " of " + POLICIES.length + " policy sources" +
       (state.priorityDomains.length ? " across priority domains" : "");
     if (!records.length) {
-      list.appendChild(create("div", "empty-state", "No policy sources match this view. Reset the filters to continue."));
+      list.appendChild(create("div", "empty-state", POLICIES.length
+        ? "No policy sources match this view. Reset the filters to continue."
+        : "No policy sources have been added yet. Add the project-owner-supplied records to data.js."));
     }
     records.forEach(function (policy) {
       var card = create("article", "policy-card");
@@ -367,7 +377,7 @@
       body.appendChild(action);
       card.appendChild(body);
       var actions = create("div", "policy-actions");
-      var source = create("a", null, "Official source ↗");
+      var source = create("a", null, "View source ↗");
       source.href = policy.url;
       source.target = "_blank";
       source.rel = "noopener";
@@ -402,7 +412,8 @@
   }
 
   function renderCompare() {
-    $("#compare-count").textContent = compareIds.length;
+    var count = $("#compare-count");
+    if (count) { count.textContent = compareIds.length; }
     var list = $("#compare-list");
     list.innerHTML = "";
     if (!compareIds.length) {
@@ -430,21 +441,23 @@
     $("#compare-drawer").classList.add("open");
     $("#drawer-scrim").classList.add("open");
     $("#compare-drawer").setAttribute("aria-hidden", "false");
-    $("#compare-trigger").setAttribute("aria-expanded", "true");
+    var trigger = $("#compare-trigger");
+    if (trigger) { trigger.setAttribute("aria-expanded", "true"); }
     $("#compare-close").focus();
   }
   function closeDrawer() {
     $("#compare-drawer").classList.remove("open");
     $("#drawer-scrim").classList.remove("open");
     $("#compare-drawer").setAttribute("aria-hidden", "true");
-    $("#compare-trigger").setAttribute("aria-expanded", "false");
+    var trigger = $("#compare-trigger");
+    if (trigger) { trigger.setAttribute("aria-expanded", "false"); }
   }
 
   function csvCell(value) {
     return '"' + String(value || "").replace(/"/g, '""') + '"';
   }
   function exportComparison() {
-    var headers = ["Title", "Issuer", "Jurisdiction", "Domain", "Instrument", "Status", "Binding", "Year", "Rural action", "Official source"];
+    var headers = ["Title", "Issuer", "Jurisdiction", "Domain", "Instrument", "Status", "Binding", "Year", "Rural action", "Source"];
     var rows = [headers.map(csvCell).join(",")];
     compareIds.forEach(function (id) {
       var policy = POLICIES.find(function (item) { return item.id === id; });
@@ -471,17 +484,18 @@
         if (scope === "federal-responsibility") {
           setExplorerFilters({ jurisdiction: "Federal", effect: "binding" });
         } else if (scope === "state-responsibility") {
-          setExplorerFilters({ jurisdiction: "Georgia", effect: "binding" });
+          setExplorerFilters({ jurisdiction: "States & DC" });
         } else if (scope === "federal-framework") {
           setExplorerFilters({ jurisdiction: "Federal", effect: "guidance" });
         } else if (scope === "state-bills") {
-          setExplorerFilters({ jurisdiction: "Georgia", search: "state law" });
+          setExplorerFilters({ jurisdiction: "States & DC" });
         }
         $("#explorer").scrollIntoView({ behavior: "smooth", block: "start" });
       });
     });
 
-    $("#compare-trigger").addEventListener("click", openDrawer);
+    var compareTrigger = $("#compare-trigger");
+    if (compareTrigger) { compareTrigger.addEventListener("click", openDrawer); }
     $("#compare-close").addEventListener("click", closeDrawer);
     $("#drawer-scrim").addEventListener("click", closeDrawer);
     $("#compare-clear").addEventListener("click", function () {
@@ -493,17 +507,6 @@
     $("#compare-export").addEventListener("click", exportComparison);
     document.addEventListener("keydown", function (event) {
       if (event.key === "Escape") { closeDrawer(); }
-    });
-
-    var toggle = $(".nav-toggle");
-    var nav = $("#site-nav");
-    toggle.addEventListener("click", function () {
-      var open = nav.classList.toggle("open");
-      toggle.setAttribute("aria-expanded", String(open));
-    });
-    nav.addEventListener("click", function () {
-      nav.classList.remove("open");
-      toggle.setAttribute("aria-expanded", "false");
     });
 
     $("#copy-link").addEventListener("click", function () {
@@ -526,18 +529,11 @@
       }
     });
 
-    var sections = $$("main section[id]");
-    var navLinks = $$("#site-nav a");
     var pending = false;
     function updateScroll() {
       pending = false;
       var available = document.documentElement.scrollHeight - innerHeight;
       $("#progress-bar").style.transform = "scaleX(" + (available > 0 ? scrollY / available : 0) + ")";
-      var active = sections[0].id;
-      sections.forEach(function (section) {
-        if (section.getBoundingClientRect().top < 120) { active = section.id; }
-      });
-      navLinks.forEach(function (link) { link.classList.toggle("active", link.hash === "#" + active); });
     }
     addEventListener("scroll", function () {
       if (!pending) { pending = true; requestAnimationFrame(updateScroll); }

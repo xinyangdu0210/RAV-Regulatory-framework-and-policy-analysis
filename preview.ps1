@@ -5,7 +5,7 @@ $previewUrl = "http://127.0.0.1:8000/"
 $pythonPath = (Get-Command python -ErrorAction Stop).Source
 
 Write-Host ""
-Write-Host "Starting RAV Policy Navigator preview..." -ForegroundColor Cyan
+Write-Host "Starting RAV Policy preview..." -ForegroundColor Cyan
 Write-Host "Edit data.js, save it, and refresh the browser to see changes." -ForegroundColor Yellow
 Write-Host "Preview: $previewUrl"
 Write-Host ""
